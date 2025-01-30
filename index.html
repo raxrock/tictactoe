@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe AI</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            margin: 20px auto;
+            width: 320px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: #ddd;
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid #000;
+        }
+        .cell.taken {
+            cursor: not-allowed;
+        }
+        #reset {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Tic-Tac-Toe vs AI</h2>
+    <div class="board" id="board"></div>
+    <button id="reset">Restart Game</button>
+
+    <script>
+        const board = document.getElementById("board");
+        const resetButton = document.getElementById("reset");
+        let currentPlayer = "X";
+        let gameBoard = ["", "", "", "", "", "", "", "", ""];
+        let gameActive = true;
+
+        function createBoard() {
+            board.innerHTML = "";
+            gameBoard.forEach((cell, index) => {
+                let cellDiv = document.createElement("div");
+                cellDiv.classList.add("cell");
+                cellDiv.dataset.index = index;
+                cellDiv.innerText = cell;
+                if (cell !== "") cellDiv.classList.add("taken");
+                cellDiv.addEventListener("click", handleMove);
+                board.appendChild(cellDiv);
+            });
+        }
+
+        function handleMove(event) {
+            let index = event.target.dataset.index;
+            if (gameBoard[index] === "" && gameActive) {
+                gameBoard[index] = "X"; 
+                event.target.innerText = "X";
+                event.target.classList.add("taken");
+
+                if (checkWin("X")) {
+                    setTimeout(() => alert("You Win!"), 100);
+                    gameActive = false;
+                    return;
+                }
+
+                if (gameBoard.every(cell => cell !== "")) {
+                    setTimeout(() => alert("It's a Draw!"), 100);
+                    gameActive = false;
+                    return;
+                }
+
+                setTimeout(AIMove, 300); 
+            }
+        }
+
+        function AIMove() {
+            let emptyCells = gameBoard.map((val, index) => val === "" ? index : null).filter(v => v !== null);
+            if (emptyCells.length > 0 && gameActive) {
+                let aiIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                gameBoard[aiIndex] = "O"; 
+                document.querySelector(`[data-index='${aiIndex}']`).innerText = "O";
+                document.querySelector(`[data-index='${aiIndex}']`).classList.add("taken");
+
+                if (checkWin("O")) {
+                    setTimeout(() => alert("AI Wins!"), 100);
+                    gameActive = false;
+                }
+            }
+        }
+
+        function checkWin(player) {
+            const winPatterns = [
+                [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+                [0, 3, 6], [1, 4, 7], [2, 5, 8], 
+                [0, 4, 8], [2, 4, 6]
+            ];
+            return winPatterns.some(pattern => 
+                pattern.every(index => gameBoard[index] === player)
+            );
+        }
+
+        resetButton.addEventListener("click", () => {
+            gameBoard = ["", "", "", "", "", "", "", "", ""];
+            currentPlayer = "X";
+            gameActive = true;
+            createBoard();
+        });
+
+        createBoard();
+    </script>
+
+</body>
+</html>
